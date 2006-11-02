@@ -2,7 +2,6 @@
 <Module>
 <ModulePrefs title="Flickr: __UP_email__"
              directory_title="Random Flickr Pictures"
-             height="280"
              render_inline="never"
              description = "Display a random picture for a flickr user"
              author = "Allen Hutchison"
