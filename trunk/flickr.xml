@@ -9,10 +9,13 @@
              author_email = "allen.hutchison+flickr_ig_module@gmail.com"
              author_affiliation = "Hutchison.org"
              author_location = "Sunnyvale, CA"
-             screenshot = "http://www.hutchison.org/flickr_module/flickr_screenshot.jpg"
+             screenshot = "http://flickr-image-gadget.googlecode.com/svn/trunk/flickr_screenshot.jpg"
              scaling = "false"
              scrolling = "false"
-/>
+>
+<Require feature="dynamic-height"/>
+</ModulePrefs>
+
 <UserPref name="email" display_name="Email Address" default_value="allen@hutchison.org" required="true"/>
 <UserPref name="interval" display_name="Interval:" default_value="10 seconds" datatype="enum">
       <EnumValue value="Don't change"/>
@@ -25,7 +28,7 @@
 </UserPref>
   
 <Content type="html"><![CDATA[
-<script type="text/javascript" src="http://www.hutchison.org/flickr_module/tinyxmldom.js"></script>
+<script type="text/javascript" src="http://flickr-image-gadget.googlecode.com/svn/trunk/tinyxmldom.js"></script>
 <script type="text/javascript">
 
 var API_KEY = '831daa0170750fb1603770b8dd00096e';
