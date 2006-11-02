@@ -119,7 +119,7 @@ function displayPhoto (url, photoId, height) {
   } else {
     photo.src = url;
   }
-  _IG_AdjustIFrameHeight();
+  _IG_AdjustIFrameHeight(height);
 }
 
 function displayCaption (caption) {
