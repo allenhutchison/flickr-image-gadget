@@ -3,7 +3,7 @@
 <ModulePrefs title="Flickr: __UP_email__"
              directory_title="Random Flickr Pictures"
              render_inline="never"
-             height="100"
+             height="280"
              description = "Display a random picture for a flickr user"
              author = "Allen Hutchison"
              author_email = "allen.hutchison+flickr_ig_module@gmail.com"
@@ -85,8 +85,7 @@ function getPhotoUrl (photoId) {
       var label = sizes[i].getAttribute("label");
       if (label == 'Small') {
         var url = sizes[i].getAttribute("source");
-        var height = sizes[i].getAttribute("height");
-        displayPhoto(url, photoId, height);
+        displayPhoto(url, photoId);
       }
     }
   });
@@ -108,7 +107,7 @@ function getPhotoCaption (photoId) {
   });
 }
 
-function displayPhoto (url, photoId, height) {
+function displayPhoto (url, photoId) {
   newPhoto.src = url;
   if (photo == null) {
     photo = new Image();
@@ -119,7 +118,6 @@ function displayPhoto (url, photoId, height) {
   } else {
     photo.src = url;
   }
-  _IG_AdjustIFrameHeight(height);
 }
 
 function displayCaption (caption) {
