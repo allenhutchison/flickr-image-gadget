@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Module>
+<ModulePrefs title="Flickr: __UP_email__"
+             directory_title="Random Flickr Pictures"
+             render_inline="optional"
+             height="280"
+             description = "Display a random picture for a flickr user"
+             author = "Allen Hutchison"
+             author_email = "allen.hutchison+flickr_ig_module@gmail.com"
+             author_affiliation = "Hutchison.org"
+             author_location = "Sunnyvale, CA"
+             screenshot = "http://www.hutchison.org/flickr_module/flickr_screenshot.jpg"
+             scaling = "false"
+             scrolling = "false"
+/>
+<UserPref name="email" display_name="Email Address" default_value="allen@hutchison.org" required="true"/>
+<UserPref name="interval" display_name="Interval:" default_value="10 seconds" datatype="enum">
+      <EnumValue value="Don't change"/>
+      <EnumValue value="5 seconds"/>
+      <EnumValue value="10 seconds"/>
+      <EnumValue value="15 seconds"/>
+      <EnumValue value="30 seconds"/>
+      <EnumValue value="45 seconds"/>
+      <EnumValue value="60 seconds"/>
+</UserPref>
+  
+<Content type="html"><![CDATA[
+<script type="text/javascript" src="http://www.hutchison.org/flickr_module/tinyxmldom.js"></script>
+<script type="text/javascript">
+
+var API_KEY = '831daa0170750fb1603770b8dd00096e';
+var FLICKR_API = 'http://www.flickr.com/services/rest/?api_key=' + API_KEY +
+                 '&method=flickr.';
+
+var prefs = new _IG_Prefs(__MODULE_ID__);
+var email = prefs.getString("email");
+var userId = null;
+var pages = null;
+var intControl = null;
+var interval = parseInt(0 + prefs.getString("interval"));
+var photo = null;
+var newPhoto = new Image;
+var flickrUrl = null;
+
+function getUserId (xml) {
+  var objDom = new XMLDoc(xml, xmlError);
+  userId = objDom.docNode.getElements("user")[0].getAttribute("nsid");
+}
+
+function getPhotoPages (xml) {
+  var objDom = new XMLDoc(xml, xmlError);
+  pages = objDom.docNode.getElements("photos")[0].getAttribute("pages");
+}
+
+function getRandomPhotoId () {
+	var photoNum = (Math.round((Math.random() * (pages - 1)) + 1));
+	return photoNum;
+}
+
+function getImage () {
+  var photoNum = getRandomPhotoId();
+  _IG_FetchContent(FLICKR_API + 'photos.search&per_page=1&user_id=' + userId + '&page=' + photoNum, function (xml) {
+    var photoId = getPhotoId(xml);
+    // Get the Image and display it
+    getPhotoUrl(photoId);
+    // Get the Image Title and display it
+    getPhotoCaption(photoId);
+  });   
+}
+
+function getPhotoId (xml) {
+  var objDom = new XMLDoc(xml, xmlError);
+  var photoId = objDom.docNode.getElements("photos")[0].getElements("photo")[0].getAttribute("id");
+  return photoId;
+}
+
+function getPhotoUrl (photoId) {
+  _IG_FetchContent(FLICKR_API + 'photos.getSizes&photo_id=' + photoId, function (xml) {
+    var objDom = new XMLDoc(xml, xmlError);
+    var sizes = objDom.docNode.getElements("sizes")[0].getElements("size")
+    for (var i = 0; i < sizes.length; i++) {
+      var label = sizes[i].getAttribute("label");
+      if (label == 'Small') {
+        var url = sizes[i].getAttribute("source");
+        displayPhoto(url, photoId);
+      }
+    }
+  });
+}
+
+function getPhotoCaption (photoId) {
+  _IG_FetchContent(FLICKR_API + 'photos.getInfo&photo_id=' + photoId, function (xml) {
+    var objDom = new XMLDoc(xml, xmlError);
+    var caption = objDom.docNode.getElements("photo")[0].getElements("title")[0].getText();
+    var urlNodes = objDom.docNode.getElements("photo")[0].getElements("urls")[0].getElements("url");
+
+    for (var i = 0; i < urlNodes.length; ++i) {
+      if (urlNodes[i].getAttribute("type") == "photopage") {
+        flickrUrl = urlNodes[i].getText();
+        break;
+      }
+    }
+    displayCaption(caption);
+  });
+}
+
+function displayPhoto (url, photoId) {
+  newPhoto.src = url;
+  if (photo == null) {
+    photo = new Image();
+    photo.src = url;
+    photo.onclick = openFlickr;
+    var output = _gel("photo" + __MODULE_ID__ );
+  	output.appendChild(photo);
+  } else {
+    photo.src = url;
+  }
+}
+
+function displayCaption (caption) {
+  var output = _gel("caption" + __MODULE_ID__ );
+  output.innerHTML = caption;
+}
+
+function openFlickr () {
+  if (flickrUrl == null) {
+    return;
+  } else {
+    //window.top.location.href = flickrUrl;
+    window.open(flickrUrl);
+  }
+  
+}
+
+function xmlError (e) {
+  alert(e);
+}
+
+
+function initIdPages () {
+  _IG_FetchContent(FLICKR_API + 'people.findByEmail&find_email=' + email, function (xml) {
+    getUserId(xml);
+    _IG_FetchContent(FLICKR_API + 'photos.search&per_page=1&user_id=' + userId, function (xml) {
+      getPhotoPages(xml);
+      getImage();
+    });
+  });
+}
+
+function run__MODULE_ID__ () {
+  if (userId == null || pages == null) {
+    initIdPages();
+  } else {
+    getImage();
+  }
+  
+  if (interval > 0) {
+    if (intControl != null) {
+      clearInterval(intControl);
+    }
+    intControl = setInterval("getImage();", interval * 1000);
+  }
+}
+
+run__MODULE_ID__();
+
+</script>
+
+<style type="text/css">
+  body {
+    background-color: #fff;
+  }
+
+  #photo__MODULE_ID__ {
+    text-align: center;
+    margin-top: 8px;
+    width: 100%;
+  }
+
+  #photo__MODULE_ID__ img {
+    border: 1px solid #000000;
+    cursor: pointer;
+  }
+
+  #caption__MODULE_ID__ {
+    text-align: center;
+    font-size: 14px;
+    width: 100%;
+    font-weight: normal;
+    padding-top: 5px;
+  }
+ 
+  #next__MODULE_ID__ {
+    font-size: 12px;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+  }
+</style>
+
+<div id=frame__MODULE_ID__>
+<div id=photo__MODULE_ID__></div>
+<div id=caption__MODULE_ID__><h3>Loading Pictures...</h3></div>
+</div>
+<div id=next__MODULE_ID__>
+<a href="javascript:run__MODULE_ID__()">New Picture</a>
+</div>
+]]>
+</Content>
+</Module>
