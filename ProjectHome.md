@@ -1,0 +1,1 @@
+This gadget displays random images from a Flickr email address. With this gadget you don't have to learn the flickr username for a user, just enter the email address instead.
